@@ -2,6 +2,7 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 import selenium.webdriver.support.ui as ui
+from selenium.webdriver.support.ui import Select
 import time
 #import json
 
@@ -124,6 +125,7 @@ def read_stations_from_list(path) -> list[Station]:
         stations_raw = file.read().split("\n\n")
         res = []
         for raw in stations_raw:
+#            print(raw)
             fields = raw.splitlines()
             if (len(fields) < 6): continue
             res.append(Station(fields[0], fields[1], fields[2], fields[3], fields[4], fields[5]))
@@ -135,33 +137,39 @@ login()
 
 items = read_stations_from_list("stations.txt")
 
-def wait_for_options(driver):
-    dropdowns = wait.until(lambda driver: driver.find_elements(By.CLASS_NAME, "row"))
-    dropdowns = dropdowns[1]
-    select_bank = dropdowns.find_elements(By.TAG_NAME, "select")[0]
+#def wait_for_options(driver):
 
-    return select_bank.find_elements(By.TAG_NAME, "option")
 
 
 for item in items:
     # Waits for login to complete
     nav_items = wait.until(lambda driver: driver.find_elements(By.CLASS_NAME, "nav-item"))
-    time.sleep(1)
+    time.sleep(1) # This is needed else we might get stuck at loading
     driver.get(item.link)
 
-    nav_items = wait.until(lambda driver: len(driver.find_elements(By.CLASS_NAME, "row")))
-#    nav_items = wait.until(lambda driver: len(driver.find_elements(By.CLASS_NAME, "page-wrapper overlay")) == 0)
-    time.sleep(2)
-    bank_options = wait.until(wait_for_options)
+    dropdowns = wait.until(lambda driver: driver.find_elements(By.CLASS_NAME, "row"))
+    dropdowns = dropdowns[1]
+    select_bank = dropdowns.find_elements(By.TAG_NAME, "select")[0]
+#    select_proj = dropdowns.find_elements(By.TAG_NAME, "select")[1]
+    
+    time.sleep(1)# The simlest solution I can think of right now. Not very effective
+    bank_options = wait.until(lambda x : select_bank.find_elements(By.TAG_NAME, "option"))
 
-    for o in bank_options:
-        print(o.get_attribute("innerHTML"))
-        
-    print("First Pass")
-    bank_options = wait.until(wait_for_options)
 
-    for o in bank_options:
-        print(o.get_attribute("innerHTML"))
+#    select_bank = dropdowns.find_elements(By.TAG_NAME, "select")[0]
+
+    for i in range(1, len(bank_options)):
+        select_bank_element = Select(select_bank)
+        select_bank_element.select_by_index(i)
+        time.sleep(1)
+
+        select_proj = driver.find_elements(By.CLASS_NAME, "row")[1].find_elements(By.TAG_NAME, "select")[1]
+        proj_options = select_proj.find_elements(By.TAG_NAME, "option")
+        print(len(proj_options))
+        for j in range(1, len(proj_options)):
+            select_proj_element = Select(select_proj)
+            select_proj_element.select_by_index(j)
+            time.sleep(5)
 
 
     while (True):

@@ -397,14 +397,14 @@ Haryana
 India
 https://psms-web.azureedge.net/stationpreference/student/stationdetails/5515/54900
 
-Critical Path Technologies Private Limited (“SalarySe) - Non Tech
+Critical Path Technologies Private Limited (â€œSalarySe) - Non Tech
 Others
 Gurgaon
 Haryana
 India
 https://psms-web.azureedge.net/stationpreference/student/stationdetails/5804/54900
 
-Critical Path Technologies Private Limited (“SalarySe) - Tech
+Critical Path Technologies Private Limited (â€œSalarySe) - Tech
 CSIS/IT
 Gurgaon
 Haryana
@@ -1209,7 +1209,7 @@ Maharashtra
 India
 https://psms-web.azureedge.net/stationpreference/student/stationdetails/5788/54900
 
-JPMC GR&C AWM Risk Analytics – Quantitative Research
+JPMC GR&C AWM Risk Analytics â€“ Quantitative Research
 Finance and Mgmt
 Bengaluru
 Karnataka
