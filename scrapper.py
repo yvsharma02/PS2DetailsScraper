@@ -10,6 +10,73 @@ import time
 PASSWORD = ""
 USERNAME = ""
 
+class Project:
+    title               = ''
+    desc                = ''
+
+    stipend_fd          = ''
+    stipend_hd          = ''
+    stipend_cur         = ''
+
+    domain              = ''
+    subdomain           = ''
+
+    degree_type         = ''
+    graduate_type       = ''
+
+    tech_skills         = ''
+    non_tech_skills     = ''
+
+    first_degree        = ''
+
+    courses             = ''
+    grades              = ''
+
+    ofst                = ''
+    ofet                = ''
+    holidays            = ''
+
+    def __str__(self) -> str:
+        return f"Title: {self.title}\n" \
+               f"Description: {self.desc}\n" \
+               f"Stipend (For First Degree): {self.stipend_fd}\n" \
+               f"Stipend (For Higher Degree): {self.stipend_hd}\n" \
+               f"Stipend Currency: {self.stipend_cur}\n" \
+               f"Domain: {self.domain}\n" \
+               f"Subdomain: {self.subdomain}\n" \
+               f"Degree Type: {self.degree_type}\n" \
+               f"Graduate Type: {self.graduate_type}\n" \
+               f"Technical Skills: {self.tech_skills}\n" \
+               f"Non-Technical Skills: {self.non_tech_skills}\n" \
+               f"First Degree: {self.first_degree}\n" \
+               f"Courses: {self.courses}\n" \
+               f"Grades: {self.grades}\n" \
+               f"Start Date: {self.ofst}\n" \
+               f"End Date: {self.ofet}\n" \
+               f"Holidays: {self.holidays}"
+
+    def __init__(self, title='', desc='', stipend_fd='', stipend_hd='', stipend_cur='',
+                 domain='', subdomain='', degree_type='', graduate_type='', tech_skills='',
+                 non_tech_skills='', first_degree='', courses='', grades='', ofst='', ofet='',
+                 holidays='') -> None:
+        self.title = title
+        self.desc = desc
+        self.stipend_fd = stipend_fd
+        self.stipend_hd = stipend_hd
+        self.stipend_cur = stipend_cur
+        self.domain = domain
+        self.subdomain = subdomain
+        self.degree_type = degree_type
+        self.graduate_type = graduate_type
+        self.tech_skills = tech_skills
+        self.non_tech_skills = non_tech_skills
+        self.first_degree = first_degree
+        self.courses = courses
+        self.grades = grades
+        self.ofst = ofst
+        self.ofet = ofet
+        self.holidays = holidays
+        
 
 class Station:
     name = ""
@@ -131,17 +198,48 @@ def read_stations_from_list(path) -> list[Station]:
             res.append(Station(fields[0], fields[1], fields[2], fields[3], fields[4], fields[5]))
     return res
 
-login()
-#goto_station_details_page()
-#save_stations_to_file("stations.txt", extract_stations())
+def extract_proj():
+    title = driver.find_element(By.XPATH, "//*[contains(text(), 'Project Title')]/following-sibling::*").text
+    desc = driver.find_element(By.XPATH, "//*[contains(text(), ' Project Description')]/following-sibling::*").text
+    #Stipend For First Degree
 
-items = read_stations_from_list("stations.txt")
+    stipend_fd = driver.find_element(By.XPATH, "//*[contains(text(), 'Stipend For First Degree')]/following-sibling::*").text
+    stipend_hd = driver.find_element(By.XPATH, "//*[contains(text(), 'Stipend For Higher Degree')]/following-sibling::*").text
+    stipend_cur = driver.find_element(By.XPATH, "//*[contains(text(), 'Currency')]/following-sibling::*").text
 
-#def wait_for_options(driver):
+    domain = driver.find_element(By.XPATH, "//*[contains(text(), 'Project Domain')]/following-sibling::*").text
+    subdomain = driver.find_element(By.XPATH, "//*[contains(text(), 'Project Sub Domain')]/following-sibling::*").text
+
+    degree_type = driver.find_element(By.XPATH, "//*[contains(text(), 'Degree Type')]/following-sibling::*").text
+    graduate_type = driver.find_element(By.XPATH, "//*[contains(text(), ' Graduate Type')]/following-sibling::*").text
+
+    tech_skills = driver.find_element(By.XPATH, "//*[contains(text(), 'Technical Skills')]/following-sibling::*").text
+    non_tech_skills = driver.find_element(By.XPATH, "//*[contains(text(), 'Non Technical Skills')]/following-sibling::*").text
+
+    first_degree = driver.find_element(By.XPATH, "//*[contains(text(), ' First Degree')]/following-sibling::*").text
+
+    courses = ""
+    grades = ""
+#    courses = driver.find_element(By.XPATH, "//*[contains(text(), 'Course(s)')]/following-sibling::*").text
+#    grades = driver.find_element(By.XPATH, "//*[contains(text(), 'Grade')]/following-sibling::*").text
+
+    ofst = driver.find_element(By.XPATH, "//*[contains(text(), 'Office Start Time')]/following-sibling::*").text
+    ofet = driver.find_element(By.XPATH, "//*[contains(text(), 'Office End Time')]/following-sibling::*").text
+    holidays = driver.find_element(By.XPATH, "//*[contains(text(), 'Weekly Holidays')]/following-sibling::*").text
+    
+    project_instance = Project(title=title, desc=desc, stipend_fd=stipend_fd, stipend_hd=stipend_hd,
+                           stipend_cur=stipend_cur, domain=domain, subdomain=subdomain,
+                           degree_type=degree_type, graduate_type=graduate_type,
+                           tech_skills=tech_skills, non_tech_skills=non_tech_skills,
+                           first_degree=first_degree, courses=courses, grades=grades,
+                           ofst=ofst, ofet=ofet, holidays=holidays)
 
 
+    return project_instance
+#    print(str(project_instance))
+#    print('\n'.join([title, desc, stipend_fd, stipend_hd, stipend_cur, domain, subdomain, degree_type, graduate_type, tech_skills, non_tech_skills, first_degree]) + "___________________")
 
-for item in items:
+def extract_info(item):
     # Waits for login to complete
     nav_items = wait.until(lambda driver: driver.find_elements(By.CLASS_NAME, "nav-item"))
     time.sleep(1) # This is needed else we might get stuck at loading
@@ -165,15 +263,22 @@ for item in items:
 
         select_proj = driver.find_elements(By.CLASS_NAME, "row")[1].find_elements(By.TAG_NAME, "select")[1]
         proj_options = select_proj.find_elements(By.TAG_NAME, "option")
-        print(len(proj_options))
+#        print(len(proj_options))
         for j in range(1, len(proj_options)):
             select_proj_element = Select(select_proj)
             select_proj_element.select_by_index(j)
-            time.sleep(5)
+            time.sleep(1)
+            extract_proj()
 
+login()
+#goto_station_details_page()
+#save_stations_to_file("stations.txt", extract_stations())
 
-    while (True):
-        pass
+items = read_stations_from_list("stations.txt")
+
+#def wait_for_options(driver):
+
+extract_info(items[2])
 
 while (True):
     pass
