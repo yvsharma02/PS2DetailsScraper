@@ -3,7 +3,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 import selenium.webdriver.support.ui as ui
 import time
-import json
+#import json
 
 #read from secret.txt
 PASSWORD = ""
@@ -20,18 +20,19 @@ class Station:
 
     def __init__(self, name, domain, city, state, country, link):
         self.name = name
+        self.domain = domain
         self.state = state
         self.city = city
         self.country = country
         self.link = link
 
-    def toJSON(self):
-        return json.dumps(
-            self,
-            default=lambda o: o.__dict__)
+    # def toJSON(self):
+    #     return json.dumps(
+    #         self,
+    #         default=lambda o: o.__dict__)
 
     def __str__(self) -> str:
-        return self.name + ", " + self.domain + ", " + ", " + self.city + ", " + self.state + ", " + self.country + ", " + self.link
+        return '\n'.join([self.name, self.domain, self.city, self.state, self.country, self.link]) + '\n\n'
 
 
 with (open("secret.txt", "r") as file):
@@ -44,6 +45,7 @@ driver = webdriver.Chrome()
 driver.get("https://psms-web.azureedge.net/login")
 
 wait = ui.WebDriverWait(driver, 100000)
+
 
 def login():
     print("Perfomring Login")
@@ -90,6 +92,12 @@ def extract_stations():
         print("Extracting: " + str(c) + "/" + str(len(items_raw)))
         c += 1
         fields = raw.find_elements(By.TAG_NAME, "td")
+        # print("\n".join([fields[0].find_element(By.TAG_NAME, "a").text,
+        #         fields[1].text,
+        #         fields[2].text,
+        #         fields[3].text,
+        #         fields[4].text,
+        #         fields[5].find_element(By.TAG_NAME, "a").get_attribute("href")]) + "\n")
         items.append(
             Station(
                 fields[0].find_element(By.TAG_NAME, "a").text,
@@ -103,14 +111,25 @@ def extract_stations():
     
     return items
 
-def save_stations_as_json(path, stations):
-    c = 0
+def save_stations_to_file(path, stations):
+    print("Writing Stations File")
     with (open(path, "w+") as file):
         for station in stations:
-            print(f"Writing Station {c}/{len(stations)}")
-            file.write(station.toJSON())
-            c += 1
+#            print(str(station))
+            file.write(str(station))
 
-login()
-goto_station_details_page()
-save_stations_as_json("stations.json", extract_stations())
+def read_stations_from_list(path):
+    print("Reading Stations File")
+    with (open(path, "r") as file):
+        stations_raw = file.read().split("\n\n")
+        res = []
+        for raw in stations_raw:
+            fields = raw.splitlines()
+            if (len(fields) < 6): continue
+            res.append(Station(fields[0], fields[1], fields[2], fields[3], fields[4], fields[5]))
+    return res
+
+#login()
+#goto_station_details_page()
+#save_stations_to_file("stations.txt", extract_stations())
+#print(len(read_stations_from_list("stations.txt")))
