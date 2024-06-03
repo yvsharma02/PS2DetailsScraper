@@ -4,117 +4,15 @@ from selenium.webdriver.common.by import By
 import selenium.webdriver.support.ui as ui
 from selenium.webdriver.support.ui import Select
 import time
-import pickle
-import jsonpickle
+
+
+from common import Station, Project
+
 #import json
 
 #read from secret.txt
 PASSWORD = ""
 USERNAME = ""
-
-class Project:
-    title               = ''
-    desc                = ''
-
-    stipend_fd          = ''
-    stipend_hd          = ''
-    stipend_cur         = ''
-
-    domain              = ''
-    subdomain           = ''
-
-    degree_type         = ''
-    graduate_type       = ''
-
-    tech_skills         = ''
-    non_tech_skills     = ''
-
-    first_degree        = ''
-
-    courses             = ''
-    grades              = ''
-
-    ofst                = ''
-    ofet                = ''
-    holidays            = ''
-
-    def __str__(self) -> str:
-        return f"Title: {self.title}\n" \
-               f"Description: {self.desc}\n" \
-               f"Stipend (For First Degree): {self.stipend_fd}\n" \
-               f"Stipend (For Higher Degree): {self.stipend_hd}\n" \
-               f"Stipend Currency: {self.stipend_cur}\n" \
-               f"Domain: {self.domain}\n" \
-               f"Subdomain: {self.subdomain}\n" \
-               f"Degree Type: {self.degree_type}\n" \
-               f"Graduate Type: {self.graduate_type}\n" \
-               f"Technical Skills: {self.tech_skills}\n" \
-               f"Non-Technical Skills: {self.non_tech_skills}\n" \
-               f"First Degree: {self.first_degree}\n" \
-               f"Courses: {self.courses}\n" \
-               f"Grades: {self.grades}\n" \
-               f"Start Date: {self.ofst}\n" \
-               f"End Date: {self.ofet}\n" \
-               f"Holidays: {self.holidays}"
-
-    def __init__(self, title='', desc='', stipend_fd='', stipend_hd='', stipend_cur='',
-                 domain='', subdomain='', degree_type='', graduate_type='', tech_skills='',
-                 non_tech_skills='', first_degree='', courses='', grades='', ofst='', ofet='',
-                 holidays='') -> None:
-        self.title = title
-        self.desc = desc
-        self.stipend_fd = stipend_fd
-        self.stipend_hd = stipend_hd
-        self.stipend_cur = stipend_cur
-        self.domain = domain
-        self.subdomain = subdomain
-        self.degree_type = degree_type
-        self.graduate_type = graduate_type
-        self.tech_skills = tech_skills
-        self.non_tech_skills = non_tech_skills
-        self.first_degree = first_degree
-        self.courses = courses
-        self.grades = grades
-        self.ofst = ofst
-        self.ofet = ofet
-        self.holidays = holidays
-        
-
-class Station:
-    name = ""
-    domain = ""
-    city = ""
-    state = ""
-    country = ""
-    link = ""
-
-    projects = None
-
-    def add_projects(self, p):
-        self.projects.append(p)
-
-    def __init__(self, name, domain, city, state, country, link):
-        self.projects = []
-        self.name = name
-        self.domain = domain
-        self.state = state
-        self.city = city
-        self.country = country
-        self.link = link
-
-    def __str__(self) -> str:
-        return '\n'.join([self.name, self.domain, self.city, self.state, self.country, self.link]) + '\n\n'
-    
-    def dump(self, pathname):
-        with (open(pathname, "w+") as file):
-            file.write(jsonpickle.encode(self))
-
-    # def load(self, pathname):
-    #     with (open(pathname, "w+") as file):
-    #         picke.dump(self, file, picke.HIGHEST_PRIORITY)
-        
-
-
 
 with (open("secret.txt", "r") as file):
     lines = file.read().splitlines()
@@ -191,7 +89,6 @@ def save_stations_to_file(path, stations):
     print("Writing Stations File")
     with (open(path, "w+") as file):
         for station in stations:
-#            print(str(station))
             file.write(str(station))
 
 def read_stations_from_list(path) -> list[Station]:
@@ -200,7 +97,6 @@ def read_stations_from_list(path) -> list[Station]:
         stations_raw = file.read().split("\n\n")
         res = []
         for raw in stations_raw:
-#            print(raw)
             fields = raw.splitlines()
             if (len(fields) < 6): continue
             res.append(Station(fields[0], fields[1], fields[2], fields[3], fields[4], fields[5]))
@@ -248,8 +144,6 @@ def extract_proj():
 
 
     return project_instance
-#    print(str(project_instance))
-#    print('\n'.join([title, desc, stipend_fd, stipend_hd, stipend_cur, domain, subdomain, degree_type, graduate_type, tech_skills, non_tech_skills, first_degree]) + "___________________")
 
 def extract_info(item):
     # Waits for login to complete
@@ -262,13 +156,9 @@ def extract_info(item):
     
     dropdowns = dropdowns[1]
     select_bank = dropdowns.find_elements(By.TAG_NAME, "select")[0]
-#    select_proj = dropdowns.find_elements(By.TAG_NAME, "select")[1]
     
     time.sleep(1)# The simlest solution I can think of right now. Not very effective
     bank_options = wait.until(lambda x : select_bank.find_elements(By.TAG_NAME, "option"))
-
-
-#    select_bank = dropdowns.find_elements(By.TAG_NAME, "select")[0]
 
     for i in range(1, len(bank_options)):
         select_bank_element = Select(select_bank)
@@ -277,8 +167,6 @@ def extract_info(item):
 
         select_proj = driver.find_elements(By.CLASS_NAME, "row")[1].find_elements(By.TAG_NAME, "select")[1]
         proj_options = select_proj.find_elements(By.TAG_NAME, "option")
-#        print(len(proj_options))
-#        print(len(proj_options))
         for j in range(1, len(proj_options)):
             select_proj_element = Select(select_proj)
             select_proj_element.select_by_index(j)
@@ -286,37 +174,28 @@ def extract_info(item):
             wait.until(lambda driver: len(driver.find_elements(By.CLASS_NAME, "lds-roller")) == 0)
             item.add_projects(extract_proj())
 
-login()
-#goto_station_details_page()
-#save_stations_to_file("stations.txt", extract_stations())
-
-items = read_stations_from_list("stations.txt")
-
-#def wait_for_options(driver):
-
-def scrape(statefilepath, dumpsfold):
+def scrape(statefilepath, dumpsfold, stations):
     with (open(statefilepath, "w+") as statefile):
-        for i in range(0, len(items)):
-            print (f"Working on {i + 1}/{len(items)}")
+        for i in range(0, len(stations)):
+            print (f"Working on {i + 1}/{len(stations)}")
             statefile.write(f"START__ITEM__({i})\n")
             statefile.write(f"Starting Extraction\n")
             try:
-                extract_info(items[i])
+                extract_info(stations[i])
             except:
                 statefile.write(f"Extraction Failed:\n")
                 return
             statefile.write(f"Dumping\n")
             try:
-                items[i].dump(dumpsfold +  "/" + str(i) + ".json")
+                stations[i].dump(dumpsfold +  "/" + str(i) + ".json")
             except:
                 statefile.write(f"Dump Failed\n")
                 return
             statefile.write(f"Dump Successful\n")
             statefile.write(f"END__ITEM__({i})\n")
 
-scrape("state.txt", "dumps")
-
-#extract_info(items[0])
-#items[0].dump("item0.json")
-
-#restored = jsonpickle.decode(file.read("item0.json")) as Station
+login()
+#goto_station_details_page()
+#save_stations_to_file("stations.txt", extract_stations())
+stations = read_stations_from_list("stations.txt")
+scrape("generated/state.txt", "dumps", stations)
