@@ -52,5 +52,5 @@ def create_exel(path, stations):
     workbook.close()
     
     
-items = load_items("dumps")
-create_exel("exel.xlsx", items)
+items = load_items("generated/dumps")
+create_exel("generated/exel.xlsx", items)
