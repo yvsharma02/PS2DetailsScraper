@@ -4,6 +4,8 @@ from selenium.webdriver.common.by import By
 import selenium.webdriver.support.ui as ui
 from selenium.webdriver.support.ui import Select
 import time
+import pickle
+import jsonpickle
 #import json
 
 #read from secret.txt
@@ -86,6 +88,13 @@ class Station:
     country = ""
     link = ""
 
+    projects = []
+
+    projects_json = ""
+
+    def add_projects(self, p):
+        self.projects.append(p)
+
     def __init__(self, name, domain, city, state, country, link):
         self.name = name
         self.domain = domain
@@ -94,13 +103,20 @@ class Station:
         self.country = country
         self.link = link
 
-    # def toJSON(self):
-    #     return json.dumps(
-    #         self,
-    #         default=lambda o: o.__dict__)
-
     def __str__(self) -> str:
         return '\n'.join([self.name, self.domain, self.city, self.state, self.country, self.link]) + '\n\n'
+    
+    def dump(self, pathname):
+        self.projects_json = jsonpickle.encode(self.projects)
+        with (open(pathname, "w+") as file):
+            file.write(jsonpickle.encode(self))
+        self.projects_json = ""
+
+    # def load(self, pathname):
+    #     with (open(pathname, "w+") as file):
+    #         picke.dump(self, file, picke.HIGHEST_PRIORITY)
+        
+
 
 
 with (open("secret.txt", "r") as file):
@@ -160,12 +176,7 @@ def extract_stations():
         print("Extracting: " + str(c) + "/" + str(len(items_raw)))
         c += 1
         fields = raw.find_elements(By.TAG_NAME, "td")
-        # print("\n".join([fields[0].find_element(By.TAG_NAME, "a").text,
-        #         fields[1].text,
-        #         fields[2].text,
-        #         fields[3].text,
-        #         fields[4].text,
-        #         fields[5].find_element(By.TAG_NAME, "a").get_attribute("href")]) + "\n")
+
         items.append(
             Station(
                 fields[0].find_element(By.TAG_NAME, "a").text,
@@ -268,7 +279,7 @@ def extract_info(item):
             select_proj_element = Select(select_proj)
             select_proj_element.select_by_index(j)
             time.sleep(1)
-            extract_proj()
+            item.add_projects(extract_proj())
 
 login()
 #goto_station_details_page()
@@ -278,7 +289,28 @@ items = read_stations_from_list("stations.txt")
 
 #def wait_for_options(driver):
 
-extract_info(items[2])
+def scrape(statefilepath, dumpsfold):
+    with (open(statefilepath, "w+") as statefile):
+        for i in range(0, len(items)):
+            statefile.write("START__ITEM__({i})\n")
+            statefile.write(f"Starting Extraction\n")
+            try:
+                extract_info(items[i])
+            except:
+                statefile.write(f"Extraction Failed:\n")
+                return
+            statefile.write(f"Dumping\n")
+            try:
+                items[i].dump(dumpsfold +  "/" + str(i) + "dmp")
+            except:
+                statefile.write(f"Dump Failed\n")
+                return
+            statefile.write(f"Dump Successful\n")
+            statefile.write("END__ITEM__({i})\n")
 
-while (True):
-    pass
+scrape("state.txt", "dumps")
+
+#extract_info(items[0])
+#items[0].dump("item0.json")
+
+#restored = jsonpickle.decode(file.read("item0.json")) as Station
