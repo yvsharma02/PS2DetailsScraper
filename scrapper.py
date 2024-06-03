@@ -88,14 +88,13 @@ class Station:
     country = ""
     link = ""
 
-    projects = []
-
-    projects_json = ""
+    projects = None
 
     def add_projects(self, p):
         self.projects.append(p)
 
     def __init__(self, name, domain, city, state, country, link):
+        self.projects = []
         self.name = name
         self.domain = domain
         self.state = state
@@ -107,10 +106,8 @@ class Station:
         return '\n'.join([self.name, self.domain, self.city, self.state, self.country, self.link]) + '\n\n'
     
     def dump(self, pathname):
-        self.projects_json = jsonpickle.encode(self.projects)
         with (open(pathname, "w+") as file):
             file.write(jsonpickle.encode(self))
-        self.projects_json = ""
 
     # def load(self, pathname):
     #     with (open(pathname, "w+") as file):
@@ -281,6 +278,7 @@ def extract_info(item):
         select_proj = driver.find_elements(By.CLASS_NAME, "row")[1].find_elements(By.TAG_NAME, "select")[1]
         proj_options = select_proj.find_elements(By.TAG_NAME, "option")
 #        print(len(proj_options))
+#        print(len(proj_options))
         for j in range(1, len(proj_options)):
             select_proj_element = Select(select_proj)
             select_proj_element.select_by_index(j)
@@ -299,7 +297,8 @@ items = read_stations_from_list("stations.txt")
 def scrape(statefilepath, dumpsfold):
     with (open(statefilepath, "w+") as statefile):
         for i in range(0, len(items)):
-            statefile.write("START__ITEM__({i})\n")
+            print (f"Working on {i + 1}/{len(items)}")
+            statefile.write(f"START__ITEM__({i})\n")
             statefile.write(f"Starting Extraction\n")
             try:
                 extract_info(items[i])
@@ -313,7 +312,7 @@ def scrape(statefilepath, dumpsfold):
                 statefile.write(f"Dump Failed\n")
                 return
             statefile.write(f"Dump Successful\n")
-            statefile.write("END__ITEM__({i})\n")
+            statefile.write(f"END__ITEM__({i})\n")
 
 scrape("state.txt", "dumps")
 
