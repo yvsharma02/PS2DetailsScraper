@@ -231,9 +231,13 @@ def extract_proj():
 
     courses = ""
     grades = ""
-#    courses = driver.find_element(By.XPATH, "//*[contains(text(), 'Course(s)')]/following-sibling::*").text
-#    grades = driver.find_element(By.XPATH, "//*[contains(text(), 'Grade')]/following-sibling::*").text
-
+    try:
+        courses = driver.find_element(By.XPATH, "//*[contains(text(), 'Course(s)')]/following-sibling::*").text
+        grades = driver.find_element(By.XPATH, "//*[contains(text(), 'Grade')]/following-sibling::*").text
+    except:
+        courses = "-"
+        grades = "-"
+        
     ofst = driver.find_element(By.XPATH, "//*[contains(text(), 'Office Start Time')]/following-sibling::*").text
     ofet = driver.find_element(By.XPATH, "//*[contains(text(), 'Office End Time')]/following-sibling::*").text
     holidays = driver.find_element(By.XPATH, "//*[contains(text(), 'Weekly Holidays')]/following-sibling::*").text
@@ -255,8 +259,10 @@ def extract_info(item):
     nav_items = wait.until(lambda driver: driver.find_elements(By.CLASS_NAME, "nav-item"))
     time.sleep(1) # This is needed else we might get stuck at loading
     driver.get(item.link)
+    wait.until(lambda driver: len(driver.find_elements(By.CLASS_NAME, "lds-roller")) == 0)
 
     dropdowns = wait.until(lambda driver: driver.find_elements(By.CLASS_NAME, "row"))
+    
     dropdowns = dropdowns[1]
     select_bank = dropdowns.find_elements(By.TAG_NAME, "select")[0]
 #    select_proj = dropdowns.find_elements(By.TAG_NAME, "select")[1]
@@ -278,7 +284,8 @@ def extract_info(item):
         for j in range(1, len(proj_options)):
             select_proj_element = Select(select_proj)
             select_proj_element.select_by_index(j)
-            time.sleep(1)
+            time.sleep(.75)
+            wait.until(lambda driver: len(driver.find_elements(By.CLASS_NAME, "lds-roller")) == 0)
             item.add_projects(extract_proj())
 
 login()
@@ -301,7 +308,7 @@ def scrape(statefilepath, dumpsfold):
                 return
             statefile.write(f"Dumping\n")
             try:
-                items[i].dump(dumpsfold +  "/" + str(i) + "dmp")
+                items[i].dump(dumpsfold +  "/" + str(i) + ".json")
             except:
                 statefile.write(f"Dump Failed\n")
                 return
