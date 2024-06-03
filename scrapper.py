@@ -2,9 +2,6 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 import selenium.webdriver.support.ui as ui
-import pickle
-import os.path
-import json
 
 #read from secret.txt
 PASSWORD = ""
@@ -36,16 +33,19 @@ def login():
     btn = driver.find_element(By.XPATH, "//button[@type='submit']")
     btn.click()
 
-
-
-# def station_details():
-#     nav_items = wait.until(lambda driver: driver.find_elements(By.ID, "nav-item"))
-#     for item in nav_items:
-#         if (item.get_attribute("routerlinkactive") == "stationpreference/student"):
-#             item.click()
+def goto_station_details_page():
+    nav_items = wait.until(lambda driver: driver.find_elements(By.CLASS_NAME, "nav-item"))
+    for item in nav_items:
+        inner = item.find_element(By.TAG_NAME, "a")
+        if (inner.get_attribute("routerlink") == "/stationpreference/student"):
+            item.click()
+            break
+        
+    details_btn = wait.until(lambda driver: driver.find_elements(By.ID, "pills-profile-tab"))
+    details_btn[0].click()
 
 login()
-#station_details()
+goto_station_details_page()
 
 while (True):
     pass
