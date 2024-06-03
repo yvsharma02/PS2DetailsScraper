@@ -118,7 +118,7 @@ def save_stations_to_file(path, stations):
 #            print(str(station))
             file.write(str(station))
 
-def read_stations_from_list(path):
+def read_stations_from_list(path) -> list[Station]:
     print("Reading Stations File")
     with (open(path, "r") as file):
         stations_raw = file.read().split("\n\n")
@@ -129,7 +129,43 @@ def read_stations_from_list(path):
             res.append(Station(fields[0], fields[1], fields[2], fields[3], fields[4], fields[5]))
     return res
 
-#login()
+login()
 #goto_station_details_page()
 #save_stations_to_file("stations.txt", extract_stations())
-#print(len(read_stations_from_list("stations.txt")))
+
+items = read_stations_from_list("stations.txt")
+
+def wait_for_options(driver):
+    dropdowns = wait.until(lambda driver: driver.find_elements(By.CLASS_NAME, "row"))
+    dropdowns = dropdowns[1]
+    select_bank = dropdowns.find_elements(By.TAG_NAME, "select")[0]
+
+    return select_bank.find_elements(By.TAG_NAME, "option")
+
+
+for item in items:
+    # Waits for login to complete
+    nav_items = wait.until(lambda driver: driver.find_elements(By.CLASS_NAME, "nav-item"))
+    time.sleep(1)
+    driver.get(item.link)
+
+    nav_items = wait.until(lambda driver: len(driver.find_elements(By.CLASS_NAME, "row")))
+#    nav_items = wait.until(lambda driver: len(driver.find_elements(By.CLASS_NAME, "page-wrapper overlay")) == 0)
+    time.sleep(2)
+    bank_options = wait.until(wait_for_options)
+
+    for o in bank_options:
+        print(o.get_attribute("innerHTML"))
+        
+    print("First Pass")
+    bank_options = wait.until(wait_for_options)
+
+    for o in bank_options:
+        print(o.get_attribute("innerHTML"))
+
+
+    while (True):
+        pass
+
+while (True):
+    pass
