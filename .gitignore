@@ -2,7 +2,4 @@ secret.txt
 **/__pycache__
 
 #generated files
-generated/stations
-generated/dumps/
-generated/state.txt
-generated/result.exel
+generated/*
