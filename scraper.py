@@ -4,7 +4,9 @@ from selenium.webdriver.common.by import By
 import selenium.webdriver.support.ui as ui
 from selenium.webdriver.support.ui import Select
 import time
-
+import jsonpickle
+#import os.path
+import os
 
 from common import Station, Project
 
@@ -175,6 +177,10 @@ def extract_info(item):
             item.add_projects(extract_proj())
 
 def scrape(statefilepath, dumpsfold, stations):
+
+    if (not os.path.isdir(dumpsfold)):
+        os.makedirs(dumpsfold)
+
     with (open(statefilepath, "w+") as statefile):
         for i in range(0, len(stations)):
             print (f"Working on {i + 1}/{len(stations)}")
@@ -186,16 +192,17 @@ def scrape(statefilepath, dumpsfold, stations):
                 statefile.write(f"Extraction Failed:\n")
                 return
             statefile.write(f"Dumping\n")
-            try:
-                stations[i].dump(dumpsfold +  "/" + str(i) + ".json")
-            except:
-                statefile.write(f"Dump Failed\n")
-                return
+#            try:
+            stations[i].dump(dumpsfold +  "/" + str(i) + ".json")
+#            except:
+#            statefile.write(f"Dump Failed\n")
+#            return
             statefile.write(f"Dump Successful\n")
             statefile.write(f"END__ITEM__({i})\n")
 
 login()
-#goto_station_details_page()
-#save_stations_to_file("stations.txt", extract_stations())
-stations = read_stations_from_list("stations.txt")
-scrape("generated/state.txt", "dumps", stations)
+if (not os.path.exists("generated/stations.txt")):
+    goto_station_details_page()
+    save_stations_to_file("generated/stations.txt", extract_stations())
+stations = read_stations_from_list("generated/stations.txt")
+scrape("generated/state.txt", "generated/dumps", stations)

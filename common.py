@@ -1,3 +1,5 @@
+import jsonpickle
+
 class Project:
     title               = ''
     desc                = ''
