@@ -186,7 +186,9 @@ def extract_info(item):
             item.add_projects(extract_proj())
 
 def get_dmpfile_name(index):
-    return stations[index].link[stations[index].link.rfind('/') + 1:]
+    link = stations[index].link
+    link = link[0:link.rfind('/')]
+    return link[link.rfind('/') + 1:]
 
 def scrape(statefilepath, dumpsfold, stations):
 
@@ -210,6 +212,7 @@ def scrape(statefilepath, dumpsfold, stations):
                 statefile.write(f"Extraction Failed:\n")
                 return
             statefile.write(f"Dumping\n")
+            print(dumpsfold +  "/" + get_dmpfile_name(i) + ".json")
             try:
                 stations[i].dump(dumpsfold +  "/" + get_dmpfile_name(i) + ".json")
             except:
