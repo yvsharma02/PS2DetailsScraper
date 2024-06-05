@@ -147,6 +147,15 @@ def extract_proj():
 
     return project_instance
 
+def get_scrapped_stations_link_set(dmpsfldr):
+    items = set()
+    files = os.listdir(dmpsfldr)
+    for fpath in files:
+        with (open(dmpsfldr + "/" + fpath, "r") as file):
+            items.add(jsonpickle.decode(file.read()).link)
+
+    return items
+
 def extract_info(item):
     # Waits for login to complete
     nav_items = wait.until(lambda driver: driver.find_elements(By.CLASS_NAME, "nav-item"))
@@ -176,14 +185,23 @@ def extract_info(item):
             wait.until(lambda driver: len(driver.find_elements(By.CLASS_NAME, "lds-roller")) == 0)
             item.add_projects(extract_proj())
 
+def get_dmpfile_name(index):
+    return stations[index].link[stations[index].link.rfind('/') + 1:]
+
 def scrape(statefilepath, dumpsfold, stations):
 
     if (not os.path.isdir(dumpsfold)):
         os.makedirs(dumpsfold)
 
+    scraped_set = get_scrapped_stations_link_set("generated/dumps")
     with (open(statefilepath, "w+") as statefile):
         for i in range(0, len(stations)):
             print (f"Working on {i + 1}/{len(stations)}")
+
+            if (stations[i].link in scraped_set):
+                statefile.write("EXISTS__({i})\n")
+                continue
+
             statefile.write(f"START__ITEM__({i})\n")
             statefile.write(f"Starting Extraction\n")
             try:
@@ -192,17 +210,20 @@ def scrape(statefilepath, dumpsfold, stations):
                 statefile.write(f"Extraction Failed:\n")
                 return
             statefile.write(f"Dumping\n")
-#            try:
-            stations[i].dump(dumpsfold +  "/" + str(i) + ".json")
-#            except:
-#            statefile.write(f"Dump Failed\n")
-#            return
+            try:
+                stations[i].dump(dumpsfold +  "/" + get_dmpfile_name(i) + ".json")
+            except:
+                statefile.write(f"Dump Failed\n")
+                return
             statefile.write(f"Dump Successful\n")
             statefile.write(f"END__ITEM__({i})\n")
+            scraped_set.add(stations[i].link)
 
 login()
+
 if (not os.path.exists("generated/stations.txt")):
     goto_station_details_page()
     save_stations_to_file("generated/stations.txt", extract_stations())
+
 stations = read_stations_from_list("generated/stations.txt")
 scrape("generated/state.txt", "generated/dumps", stations)
