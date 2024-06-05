@@ -26,6 +26,10 @@ def create_exel(path, stations):
     worksheet.write(0, 3, "Title", header_format)
     worksheet.write(0, 4, "Stipend", header_format)
     worksheet.write(0, 5, "Degree", header_format)
+    worksheet.write(0, 6, "Holidays", header_format)
+    worksheet.write(0, 7, "Office-Start-Time", header_format)
+    worksheet.write(0, 8, "Office-End-Time", header_format)
+    worksheet.write(0, 9, "Project Details", header_format)
 
     conversion_rates = {
         "INR": 1,
@@ -47,6 +51,10 @@ def create_exel(path, stations):
             worksheet.write(r, 3, project.title)
             worksheet.write(r, 4, stipend * conversion_rates[project.stipend_cur])
             worksheet.write(r, 5, ' '.join([x[0:2] for x in project.first_degree.splitlines()]))
+            worksheet.write(r, 6, project.holidays)
+            worksheet.write(r, 7, f"{project.ofst}")
+            worksheet.write(r, 8, f"f{project.ofet}")
+            worksheet.write(r, 9, f"{project.desc}")
             r += 1
     
     workbook.close()
