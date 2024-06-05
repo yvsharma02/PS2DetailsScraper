@@ -1,6 +1,7 @@
 import jsonpickle
 import os
 import xlsxwriter
+import pandas as pd
 
 from common import Station, Project
 
@@ -58,7 +59,24 @@ def create_exel(path, stations):
             r += 1
     
     workbook.close()
-    
+
+def create_json(exelpath, outputpath):
+    data = pd.read_excel(exelpath)
+    data.reset_index()
+
+    list = []
+
+    for index, row in data.iterrows():
+        list.append(row.to_json())
+
+    with open(outputpath, 'w+') as file:
+        file.write('[')
+        for i in range(0, len(list)):
+            file.write(list[i])
+            if (i != len(list) - 1):
+                file.write(', ')
+        file.write(']')
     
 items = load_items("generated/dumps")
-create_exel("generated/exel.xlsx", items)
+create_exel("generated/data.xlsx", items)
+create_json("generated/data.xlsx", "generated/data.json")
