@@ -144,6 +144,7 @@ def extract_proj():
     except Exception as e:
         msg = str(e)
         print(f"Failed Extraction: ${msg}")
+        pass
 
     courses = ""
     grades = ""
