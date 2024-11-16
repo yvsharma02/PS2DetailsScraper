@@ -22,7 +22,7 @@ with (open("secret.txt", "r") as file):
     PASSWORD = lines[1]
 
 
-driver = webdriver.Safari()
+driver = webdriver.Firefox()
 driver.get("https://psms.bits-pilani.ac.in/")
 
 wait = ui.WebDriverWait(driver, 100000)
