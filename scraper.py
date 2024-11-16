@@ -111,7 +111,7 @@ def extract_detail(detail_name, link, supress = True):
         return val
     except Exception as e:
         msg = f"[${link}]: {detail_name}"
-        print(f"Failed to [${msg}], due to [${str(e)}]")
+        # print(f"Failed to [${msg}], due to [${str(e)}]")
         with (open ("generated/failure.txt", "a+") as f):
             f.write(msg)
         if (supress):
@@ -249,6 +249,6 @@ stations = read_stations_from_list("generated/stations.txt")
 
 scrape("generated/state.txt", "generated/dumps", stations, failed_list=failed_list)
 
-failed_stations = [station for station in stations if station.link not in failed_list]
+failed_stations = [station for station in stations if station.link in failed_list]
 retry_list_file_name = str(datetime.datetime.now()).replace(":", "-").replace(".", "-").replace(" ", "-")
-save_stations_to_file(f"generated/retry_${retry_list_file_name}.txt", failed_stations)
+save_stations_to_file(f"generated/retry_{retry_list_file_name}.txt", failed_stations)
