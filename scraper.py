@@ -108,8 +108,8 @@ def extract_proj():
 
     title = ""
     desc = ""
-    stipend_fd = ""
-    stipend_hd =  ""
+    stipend_fd = "0"
+    stipend_hd =  "0"
     stipend_cur = ""
 
     domain =  ""
@@ -143,7 +143,7 @@ def extract_proj():
         first_degree = driver.find_element(By.XPATH, "//*[contains(text(), ' First Degree')]/following-sibling::*").text
     except Exception as e:
         msg = str(e)
-        print("Failed Extraction: ${msg}")
+        print(f"Failed Extraction: ${msg}")
 
     courses = ""
     grades = ""
@@ -181,6 +181,7 @@ def extract_info(item):
     # Waits for login to complete
     nav_items = wait.until(lambda driver: driver.find_elements(By.CLASS_NAME, "nav-item"))
     time.sleep(1) # This is needed else we might get stuck at loading
+    print(item.link)
     driver.get(item.link)
     wait.until(lambda driver: len(driver.find_elements(By.CLASS_NAME, "lds-roller")) == 0)
 
