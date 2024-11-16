@@ -125,9 +125,9 @@ def extract_proj(link):
     stipend_hd = extract_detail('Stipend For Higher Degree', link)
     stipend_cur = extract_detail('Currency', link)
 
-    stipend_cur = stipend_cur if stipend_cur is not "" else "0"
-    stipend_hd = stipend_hd if stipend_hd is not "" else "0"
-    stipend_fd = stipend_fd if stipend_fd is not "" else "0"
+    stipend_cur = stipend_cur if stipend_cur != "" else "0"
+    stipend_hd = stipend_hd if stipend_hd != "" else "0"
+    stipend_fd = stipend_fd if stipend_fd != "" else "0"
 
     domain = extract_detail('Project Domain', link)
     subdomain = extract_detail('Project Sub Domain', link)
@@ -195,7 +195,7 @@ def extract_info(item):
             time.sleep(2)
             wait.until(lambda driver: len(driver.find_elements(By.CLASS_NAME, "lds-roller")) == 0)
             try:
-                item.add_projects(extract_proj())
+                item.add_projects(extract_proj(item.link))
             except Exception as e:
                 print(f"Failed to add project for {item.link} due to {str(e)}")
                 with (open ("generated/failed.txt", "a+") as f):
