@@ -225,6 +225,7 @@ def scrape(statefilepath, dumpsfold, stations, failed_list):
                 extract_info(stations[i])
             except Exception as e:
                 statefile.write(f"Extraction Failed: {str(e)}\n")
+                print(f"Failed for: {stations[i].link}")
                 failed_list.append(stations[i].link)
             statefile.write(f"Dumping\n")
             print(dumpsfold +  "/" + get_dmpfile_name(i) + ".json")
