@@ -180,7 +180,7 @@ def get_scrapped_stations_link_set(dmpsfldr):
 def extract_info(item):
     # Waits for login to complete
     nav_items = wait.until(lambda driver: driver.find_elements(By.CLASS_NAME, "nav-item"))
-    time.sleep(1) # This is needed else we might get stuck at loading
+    time.sleep(2) # This is needed else we might get stuck at loading
     print(item.link)
     driver.get(item.link)
     wait.until(lambda driver: len(driver.find_elements(By.CLASS_NAME, "lds-roller")) == 0)
@@ -190,7 +190,7 @@ def extract_info(item):
     dropdowns = dropdowns[1]
     select_bank = dropdowns.find_elements(By.TAG_NAME, "select")[0]
     
-    time.sleep(1)# The simlest solution I can think of right now. Not very effective
+    time.sleep(2)# The simlest solution I can think of right now. Not very effective
     bank_options = wait.until(lambda x : select_bank.find_elements(By.TAG_NAME, "option"))
 
     for i in range(1, len(bank_options)):
