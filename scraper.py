@@ -105,24 +105,45 @@ def read_stations_from_list(path) -> list[Station]:
     return res
 
 def extract_proj():
-    title = driver.find_element(By.XPATH, "//*[contains(text(), 'Project Title')]/following-sibling::*").text
-    desc = driver.find_element(By.XPATH, "//*[contains(text(), ' Project Description')]/following-sibling::*").text
-    #Stipend For First Degree
 
-    stipend_fd = driver.find_element(By.XPATH, "//*[contains(text(), 'Stipend For First Degree')]/following-sibling::*").text
-    stipend_hd = driver.find_element(By.XPATH, "//*[contains(text(), 'Stipend For Higher Degree')]/following-sibling::*").text
-    stipend_cur = driver.find_element(By.XPATH, "//*[contains(text(), 'Currency')]/following-sibling::*").text
+    title = ""
+    desc = ""
+    stipend_fd = ""
+    stipend_hd =  ""
+    stipend_cur = ""
 
-    domain = driver.find_element(By.XPATH, "//*[contains(text(), 'Project Domain')]/following-sibling::*").text
-    subdomain = driver.find_element(By.XPATH, "//*[contains(text(), 'Project Sub Domain')]/following-sibling::*").text
+    domain =  ""
+    subdomain = ""
 
-    degree_type = driver.find_element(By.XPATH, "//*[contains(text(), 'Degree Type')]/following-sibling::*").text
-    graduate_type = driver.find_element(By.XPATH, "//*[contains(text(), ' Graduate Type')]/following-sibling::*").text
+    degree_type = ""
+    graduate_type = ""
 
-    tech_skills = driver.find_element(By.XPATH, "//*[contains(text(), 'Technical Skills')]/following-sibling::*").text
-    non_tech_skills = driver.find_element(By.XPATH, "//*[contains(text(), 'Non Technical Skills')]/following-sibling::*").text
+    tech_skills = ""
+    non_tech_skills = "" 
 
-    first_degree = driver.find_element(By.XPATH, "//*[contains(text(), ' First Degree')]/following-sibling::*").text
+    first_degree = ""
+    try:
+        title = driver.find_element(By.XPATH, "//*[contains(text(), 'Project Title')]/following-sibling::*").text
+        desc = driver.find_element(By.XPATH, "//*[contains(text(), ' Project Description')]/following-sibling::*").text
+        #Stipend For First Degree
+
+        stipend_fd = driver.find_element(By.XPATH, "//*[contains(text(), 'Stipend For First Degree')]/following-sibling::*").text
+        stipend_hd = driver.find_element(By.XPATH, "//*[contains(text(), 'Stipend For Higher Degree')]/following-sibling::*").text
+        stipend_cur = driver.find_element(By.XPATH, "//*[contains(text(), 'Currency')]/following-sibling::*").text
+
+        domain = driver.find_element(By.XPATH, "//*[contains(text(), 'Project Domain')]/following-sibling::*").text
+        subdomain = driver.find_element(By.XPATH, "//*[contains(text(), 'Project Sub Domain')]/following-sibling::*").text
+
+        degree_type = driver.find_element(By.XPATH, "//*[contains(text(), 'Degree Type')]/following-sibling::*").text
+        graduate_type = driver.find_element(By.XPATH, "//*[contains(text(), ' Graduate Type')]/following-sibling::*").text
+
+        tech_skills = driver.find_element(By.XPATH, "//*[contains(text(), 'Technical Skills')]/following-sibling::*").text
+        non_tech_skills = driver.find_element(By.XPATH, "//*[contains(text(), 'Non Technical Skills')]/following-sibling::*").text
+
+        first_degree = driver.find_element(By.XPATH, "//*[contains(text(), ' First Degree')]/following-sibling::*").text
+    except Exception as e:
+        msg = str(e)
+        print("Failed Extraction: ${msg}")
 
     courses = ""
     grades = ""
@@ -210,7 +231,7 @@ def scrape(statefilepath, dumpsfold, stations):
                 extract_info(stations[i])
             except Exception as e:
                 statefile.write(f"Extraction Failed:\n")
-                statefile.write(e)
+                statefile.write(str(e))
                 return
             statefile.write(f"Dumping\n")
             print(dumpsfold +  "/" + get_dmpfile_name(i) + ".json")
