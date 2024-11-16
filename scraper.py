@@ -194,10 +194,7 @@ def extract_info(item):
             select_proj_element.select_by_index(j)
             time.sleep(1.5)
             wait.until(lambda driver: len(driver.find_elements(By.CLASS_NAME, "lds-roller")) == 0)
-            try:
-                item.add_projects(extract_proj(item.link))
-            except Exception as e:
-                print(f"Failed to add project for {item.link} due to {str(e)}")
+            item.add_projects(extract_proj(item.link))
 
 def get_dmpfile_name(index):
     link = stations[index].link
@@ -223,9 +220,8 @@ def scrape(statefilepath, dumpsfold, stations):
             try:
                 extract_info(stations[i])
             except Exception as e:
-                statefile.write(f"Extraction Failed:\n")
+                statefile.write(f"Extraction Failed: {str(e)}\n")
                 statefile.write(str(e))
-                return
             statefile.write(f"Dumping\n")
             print(dumpsfold +  "/" + get_dmpfile_name(i) + ".json")
             try:
