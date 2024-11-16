@@ -110,7 +110,7 @@ def extract_proj():
     desc = ""
     stipend_fd = "0"
     stipend_hd =  "0"
-    stipend_cur = ""
+    stipend_cur = "0"
 
     domain =  ""
     subdomain = ""
