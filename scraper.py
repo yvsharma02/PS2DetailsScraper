@@ -104,56 +104,48 @@ def read_stations_from_list(path) -> list[Station]:
             res.append(Station(fields[0], fields[1], fields[2], fields[3], fields[4], fields[5]))
     return res
 
-def extract_proj():
+def extract_detail(detail_name, link):
+    try:
+        val = driver.find_element(By.XPATH, f"//*[contains(text(), '{detail_name}')]/following-sibling::*").text
+        return val
+    except Exception as e:
+        msg = f"[${link}]: {detail_name}"
+        print(f"Failed to [${msg}], due to [${str(e)}]")
+        with (open ("generated/failure.txt", "a+") as f):
+            f.write(msg)
+        return ""
 
-    title = ""
-    desc = ""
-    stipend_fd = "0"
-    stipend_hd =  "0"
-    stipend_cur = "0"
 
-    domain =  ""
-    subdomain = ""
-
-    degree_type = ""
-    graduate_type = ""
-
-    tech_skills = ""
-    non_tech_skills = "" 
-
-    first_degree = ""
-
-    title = driver.find_element(By.XPATH, "//*[contains(text(), 'Project Title')]/following-sibling::*").text
-    desc = driver.find_element(By.XPATH, "//*[contains(text(), ' Project Description')]/following-sibling::*").text
+def extract_proj(link):
+    title = extract_detail('Project Title', link)
+    desc = extract_detail(' Project Description', link)
     #Stipend For First Degree
 
-    stipend_fd = driver.find_element(By.XPATH, "//*[contains(text(), 'Stipend For First Degree')]/following-sibling::*").text
-    stipend_hd = driver.find_element(By.XPATH, "//*[contains(text(), 'Stipend For Higher Degree')]/following-sibling::*").text
-    stipend_cur = driver.find_element(By.XPATH, "//*[contains(text(), 'Currency')]/following-sibling::*").text
+    stipend_fd = extract_detail('Stipend For First Degree', link)
+    stipend_hd = extract_detail('Stipend For Higher Degree', link)
+    stipend_cur = extract_detail('Currency', link)
 
-    domain = driver.find_element(By.XPATH, "//*[contains(text(), 'Project Domain')]/following-sibling::*").text
-    subdomain = driver.find_element(By.XPATH, "//*[contains(text(), 'Project Sub Domain')]/following-sibling::*").text
+    stipend_cur = stipend_cur if stipend_cur is not "" else "0"
+    stipend_hd = stipend_hd if stipend_hd is not "" else "0"
+    stipend_fd = stipend_fd if stipend_fd is not "" else "0"
 
-    degree_type = driver.find_element(By.XPATH, "//*[contains(text(), 'Degree Type')]/following-sibling::*").text
-    graduate_type = driver.find_element(By.XPATH, "//*[contains(text(), ' Graduate Type')]/following-sibling::*").text
+    domain = extract_detail('Project Domain', link)
+    subdomain = extract_detail('Project Sub Domain', link)
 
-    tech_skills = driver.find_element(By.XPATH, "//*[contains(text(), 'Technical Skills')]/following-sibling::*").text
-    non_tech_skills = driver.find_element(By.XPATH, "//*[contains(text(), 'Non Technical Skills')]/following-sibling::*").text
+    degree_type = extract_detail('Degree Type', link)
+    graduate_type = extract_detail(' Graduate Type', link)
 
-    first_degree = driver.find_element(By.XPATH, "//*[contains(text(), ' First Degree')]/following-sibling::*").text
+    tech_skills = extract_detail('Technical Skills', link)
+    non_tech_skills = extract_detail('Non Technical Skills', link)
 
-    courses = ""
-    grades = ""
-    try:
-        courses = driver.find_element(By.XPATH, "//*[contains(text(), 'Course(s)')]/following-sibling::*").text
-        grades = driver.find_element(By.XPATH, "//*[contains(text(), 'Grade')]/following-sibling::*").text
-    except:
-        courses = "-"
-        grades = "-"
-        
-    ofst = driver.find_element(By.XPATH, "//*[contains(text(), 'Office Start Time')]/following-sibling::*").text
-    ofet = driver.find_element(By.XPATH, "//*[contains(text(), 'Office End Time')]/following-sibling::*").text
-    holidays = driver.find_element(By.XPATH, "//*[contains(text(), 'Weekly Holidays')]/following-sibling::*").text
+    first_degree = extract_detail(' First Degree', link)
+
+    ofst = extract_detail('Office Start Time', link)
+    ofet = extract_detail('Office End Time', link)
+    holidays = extract_detail('Weekly Holidays', link)
+
+    courses = extract_detail('Course(s)', link)
+    grades = extract_detail('Grade', link)
     
     project_instance = Project(title=title, desc=desc, stipend_fd=stipend_fd, stipend_hd=stipend_hd,
                            stipend_cur=stipend_cur, domain=domain, subdomain=subdomain,
@@ -177,7 +169,7 @@ def get_scrapped_stations_link_set(dmpsfldr):
 def extract_info(item):
     # Waits for login to complete
     nav_items = wait.until(lambda driver: driver.find_elements(By.CLASS_NAME, "nav-item"))
-    time.sleep(1.5) # This is needed else we might get stuck at loading
+    time.sleep(2) # This is needed else we might get stuck at loading
     print(item.link)
     driver.get(item.link)
     wait.until(lambda driver: len(driver.find_elements(By.CLASS_NAME, "lds-roller")) == 0)
@@ -187,20 +179,20 @@ def extract_info(item):
     dropdowns = dropdowns[1]
     select_bank = dropdowns.find_elements(By.TAG_NAME, "select")[0]
     
-    time.sleep(1.5)# The simlest solution I can think of right now. Not very effective
+    time.sleep(2)# The simlest solution I can think of right now. Not very effective
     bank_options = wait.until(lambda x : select_bank.find_elements(By.TAG_NAME, "option"))
 
     for i in range(1, len(bank_options)):
         select_bank_element = Select(select_bank)
         select_bank_element.select_by_index(i)
-        time.sleep(1.5)
+        time.sleep(2)
 
         select_proj = driver.find_elements(By.CLASS_NAME, "row")[1].find_elements(By.TAG_NAME, "select")[1]
         proj_options = select_proj.find_elements(By.TAG_NAME, "option")
         for j in range(1, len(proj_options)):
             select_proj_element = Select(select_proj)
             select_proj_element.select_by_index(j)
-            time.sleep(1.5)
+            time.sleep(2)
             wait.until(lambda driver: len(driver.find_elements(By.CLASS_NAME, "lds-roller")) == 0)
             try:
                 item.add_projects(extract_proj())
