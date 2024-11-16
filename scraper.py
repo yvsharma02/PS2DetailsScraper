@@ -7,6 +7,7 @@ import time
 import jsonpickle
 #import os.path
 import os
+import datetime
 
 from common import Station, Project
 
@@ -104,7 +105,7 @@ def read_stations_from_list(path) -> list[Station]:
             res.append(Station(fields[0], fields[1], fields[2], fields[3], fields[4], fields[5]))
     return res
 
-def extract_detail(detail_name, link):
+def extract_detail(detail_name, link, supress = True):
     try:
         val = driver.find_element(By.XPATH, f"//*[contains(text(), '{detail_name}')]/following-sibling::*").text
         return val
@@ -113,11 +114,14 @@ def extract_detail(detail_name, link):
         print(f"Failed to [${msg}], due to [${str(e)}]")
         with (open ("generated/failure.txt", "a+") as f):
             f.write(msg)
-        return ""
+        if (supress):
+            return ""
+        else:
+            raise e
 
 
 def extract_proj(link):
-    title = extract_detail('Project Title', link)
+    title = extract_detail('Project Title', link, False)
     desc = extract_detail(' Project Description', link)
     #Stipend For First Degree
 
@@ -169,7 +173,7 @@ def get_scrapped_stations_link_set(dmpsfldr):
 def extract_info(item):
     # Waits for login to complete
     nav_items = wait.until(lambda driver: driver.find_elements(By.CLASS_NAME, "nav-item"))
-    time.sleep(1.5) # This is needed else we might get stuck at loading
+    time.sleep(2) # This is needed else we might get stuck at loading
     print(item.link)
     driver.get(item.link)
     wait.until(lambda driver: len(driver.find_elements(By.CLASS_NAME, "lds-roller")) == 0)
@@ -179,20 +183,20 @@ def extract_info(item):
     dropdowns = dropdowns[1]
     select_bank = dropdowns.find_elements(By.TAG_NAME, "select")[0]
     
-    time.sleep(1.5)# The simlest solution I can think of right now. Not very effective
+    time.sleep(2)# The simlest solution I can think of right now. Not very effective
     bank_options = wait.until(lambda x : select_bank.find_elements(By.TAG_NAME, "option"))
 
     for i in range(1, len(bank_options)):
         select_bank_element = Select(select_bank)
         select_bank_element.select_by_index(i)
-        time.sleep(1.5)
+        time.sleep(2)
 
         select_proj = driver.find_elements(By.CLASS_NAME, "row")[1].find_elements(By.TAG_NAME, "select")[1]
         proj_options = select_proj.find_elements(By.TAG_NAME, "option")
         for j in range(1, len(proj_options)):
             select_proj_element = Select(select_proj)
             select_proj_element.select_by_index(j)
-            time.sleep(1.5)
+            time.sleep(2)
             wait.until(lambda driver: len(driver.find_elements(By.CLASS_NAME, "lds-roller")) == 0)
             item.add_projects(extract_proj(item.link))
 
@@ -201,7 +205,7 @@ def get_dmpfile_name(index):
     link = link[0:link.rfind('/')]
     return link[link.rfind('/') + 1:]
 
-def scrape(statefilepath, dumpsfold, stations):
+def scrape(statefilepath, dumpsfold, stations, failed_list):
 
     if (not os.path.isdir(dumpsfold)):
         os.makedirs(dumpsfold)
@@ -221,7 +225,7 @@ def scrape(statefilepath, dumpsfold, stations):
                 extract_info(stations[i])
             except Exception as e:
                 statefile.write(f"Extraction Failed: {str(e)}\n")
-                statefile.write(str(e))
+                failed_list.append(stations[i].link)
             statefile.write(f"Dumping\n")
             print(dumpsfold +  "/" + get_dmpfile_name(i) + ".json")
             try:
@@ -235,9 +239,16 @@ def scrape(statefilepath, dumpsfold, stations):
 
 login()
 
+failed_list = []
+
 if (not os.path.exists("generated/stations.txt")):
     goto_station_details_page()
     save_stations_to_file("generated/stations.txt", extract_stations())
 
 stations = read_stations_from_list("generated/stations.txt")
-scrape("generated/state.txt", "generated/dumps", stations)
+
+scrape("generated/state.txt", "generated/dumps", stations, failed_list=failed_list)
+
+failed_stations = [station for station in stations if station.link not in failed_list]
+retry_list_file_name = str(datetime.datetime.now()).replace(":", "-").replace(".", "-").replace(" ", "-")
+save_stations_to_file(f"generated/retry_${retry_list_file_name}.txt", failed_stations)

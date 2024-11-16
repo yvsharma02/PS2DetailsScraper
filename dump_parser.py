@@ -50,7 +50,7 @@ def create_exel(path, stations):
             worksheet.write(r, 1, station.city)
             worksheet.write(r, 2, project.domain)
             worksheet.write(r, 3, project.title)
-            worksheet.write(r, 4, stipend * conversion_rates[project.stipend_cur])
+            worksheet.write(r, 4, str(stipend) + str(project.stipend_cr) * conversion_rates[project.stipend_cur])
             worksheet.write(r, 5, ' '.join([x[0:2] for x in project.first_degree.splitlines()]))
             worksheet.write(r, 6, project.holidays)
             worksheet.write(r, 7, f"{project.ofst}")
