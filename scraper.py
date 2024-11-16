@@ -13,6 +13,8 @@ from common import Station, Project
 
 #import json
 
+RETRY_LIST_NAME = ""
+
 #read from secret.txt
 PASSWORD = ""
 USERNAME = ""
@@ -205,12 +207,15 @@ def get_dmpfile_name(index):
     link = link[0:link.rfind('/')]
     return link[link.rfind('/') + 1:]
 
-def scrape(statefilepath, dumpsfold, stations, failed_list):
+def scrape(statefilepath, dumpsfold, stations, failed_list, retry_mode = False):
 
     if (not os.path.isdir(dumpsfold)):
         os.makedirs(dumpsfold)
 
-    scraped_set = get_scrapped_stations_link_set("generated/dumps")
+    if (not retry_mode):
+        scraped_set = get_scrapped_stations_link_set("generated/dumps")
+    else: 
+        scraped_set = set()
     with (open(statefilepath, "w+") as statefile):
         for i in range(0, len(stations)):
             print (f"Working on {i + 1}/{len(stations)}")
@@ -240,15 +245,25 @@ def scrape(statefilepath, dumpsfold, stations, failed_list):
 
 login()
 
+retry_mode = RETRY_LIST_NAME != ""
+
+if (retry_mode):
+    print("Rerunning for all. Make sure to delete all dumps.")
+else:
+    print("WARNING: ONLY DOING RETRY STATIONS LIST.")
+
+
 failed_list = []
 
-if (not os.path.exists("generated/stations.txt")):
-    goto_station_details_page()
-    save_stations_to_file("generated/stations.txt", extract_stations())
 
-stations = read_stations_from_list("generated/stations.txt")
+if (not retry_mode):
+    if (not os.path.exists("generated/stations.txt")):
+        goto_station_details_page()
+        save_stations_to_file("generated/stations.txt", extract_stations())
 
-scrape("generated/state.txt", "generated/dumps", stations, failed_list=failed_list)
+stations = read_stations_from_list("generated/stations.txt" if not retry_mode else f"generated/{RETRY_LIST_NAME}")
+
+scrape("generated/state.txt", "generated/dumps", stations, failed_list=failed_list, retry_mode = retry_mode)
 
 failed_stations = [station for station in stations if station.link in failed_list]
 retry_list_file_name = str(datetime.datetime.now()).replace(":", "-").replace(".", "-").replace(" ", "-")
