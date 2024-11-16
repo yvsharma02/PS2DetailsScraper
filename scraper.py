@@ -23,7 +23,7 @@ with (open("secret.txt", "r") as file):
 
 
 driver = webdriver.Chrome()
-driver.get("https://psms-web.azureedge.net/login")
+driver.get("https://psms.bits-pilani.ac.in/")
 
 wait = ui.WebDriverWait(driver, 100000)
 
