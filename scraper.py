@@ -66,7 +66,6 @@ def extract_stations():
     print("Extracting Data. This step may take a while")
     table_parent = wait.until(lambda driver: driver.find_elements(By.ID, "pills-profile"))
     
-    # Wait until table has enough rows
     while True:
         items_raw = table_parent[0].find_elements(By.TAG_NAME, "tr")
         if len(items_raw) > 2:
@@ -75,16 +74,16 @@ def extract_stations():
 
     items = []
     header_row = items_raw[0]
-    items_raw = items_raw[1:]  # skip header
+    items_raw = items_raw[1:] 
 
     for c in range(len(items_raw)):
         print(f"Extracting: {c}/{len(items_raw)}")
 
         try:
-            # Refetch the table and row to avoid stale reference
+            # refetching table
             table_parent = driver.find_element(By.ID, "pills-profile")
             rows = table_parent.find_elements(By.TAG_NAME, "tr")
-            raw = rows[c + 1]  # +1 because of header row
+            raw = rows[c + 1] 
 
             fields = raw.find_elements(By.TAG_NAME, "td")
             if len(fields) < 6:
