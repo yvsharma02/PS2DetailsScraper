@@ -8,6 +8,8 @@ import jsonpickle
 #import os.path
 import os
 import datetime
+from selenium.common.exceptions import NoSuchElementException
+
 
 from common import Station, Project
 
@@ -61,34 +63,54 @@ def goto_station_details_page():
     details_btn[0].click()
 
 def extract_stations():
-    print ("Extracting Data. This step may take a while")
+    print("Extracting Data. This step may take a while")
     table_parent = wait.until(lambda driver: driver.find_elements(By.ID, "pills-profile"))
-    items_raw = table_parent[0].find_elements(By.TAG_NAME, "tr")
-    while (len(items_raw) <= 2):
-        time.sleep(1)
-        table_parent = wait.until(lambda driver: driver.find_elements(By.ID, "pills-profile"))
+    
+    # Wait until table has enough rows
+    while True:
         items_raw = table_parent[0].find_elements(By.TAG_NAME, "tr")
-    
-    items = []
-    items_raw.remove(items_raw[0])
-    c = 0
-    for raw in items_raw:
-        print("Extracting: " + str(c) + "/" + str(len(items_raw)))
-        c += 1
-        fields = raw.find_elements(By.TAG_NAME, "td")
+        if len(items_raw) > 2:
+            break
+        time.sleep(1)
 
-        items.append(
-            Station(
-                fields[0].find_element(By.TAG_NAME, "a").text,
-                fields[1].text,
-                fields[2].text,
-                fields[3].text,
-                fields[4].text,
-                fields[5].find_element(By.TAG_NAME, "a").get_attribute("href")
-            )
-        )
-    
+    items = []
+    header_row = items_raw[0]
+    items_raw = items_raw[1:]  # skip header
+
+    for c in range(len(items_raw)):
+        print(f"Extracting: {c}/{len(items_raw)}")
+
+        try:
+            # Refetch the table and row to avoid stale reference
+            table_parent = driver.find_element(By.ID, "pills-profile")
+            rows = table_parent.find_elements(By.TAG_NAME, "tr")
+            raw = rows[c + 1]  # +1 because of header row
+
+            fields = raw.find_elements(By.TAG_NAME, "td")
+            if len(fields) < 6:
+                print(f"Skipping row {c}: Not enough columns.")
+                continue
+
+            try:
+                name = fields[0].find_element(By.TAG_NAME, "a").text
+                link = fields[1].find_element(By.TAG_NAME, "a").get_attribute("href")
+            except NoSuchElementException:
+                print(f"Skipping row {c}: Missing <a> tag in field[1]")
+                continue
+
+            code = fields[2].text
+            city = fields[3].text
+            state = fields[4].text
+            country = fields[5].text
+
+            items.append(Station(name, code, city, state, country, link))
+
+        except Exception as e:
+            print(f"Skipping row {c} due to unexpected error: {e}")
+            continue
+
     return items
+
 
 def save_stations_to_file(path, stations):
     print("Writing Stations File")
