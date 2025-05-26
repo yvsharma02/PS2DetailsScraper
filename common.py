@@ -75,6 +75,7 @@ class Station:
     state = ""
     country = ""
     link = ""
+    station_id = ""
 
     projects = None
 

@@ -10,7 +10,9 @@ def load_items(dmpsfldr):
     files = os.listdir(dmpsfldr)
     for fpath in files:
         with (open(dmpsfldr + "/" + fpath, "r") as file):
-            items.append(jsonpickle.decode(file.read()))
+            mp = jsonpickle.decode(file.read())
+            mp.station_id = fpath
+            items.append(mp)
 
     return items
 
@@ -31,11 +33,12 @@ def create_exel(path, stations):
     worksheet.write(0, 7, "Office-Start-Time", header_format)
     worksheet.write(0, 8, "Office-End-Time", header_format)
     worksheet.write(0, 9, "Project Details", header_format)
+    worksheet.write(0, 10, "Station-ID")
 
-    conversion_rates = {
-        "INR": 1,
-        "USD": 83.13
-    }
+    # conversion_rates = {
+    #     "INR": 1,
+    #     "USD": 83.13
+    # }
 
     r = 1
     for station in stations:
@@ -50,12 +53,13 @@ def create_exel(path, stations):
             worksheet.write(r, 1, station.city)
             worksheet.write(r, 2, project.domain)
             worksheet.write(r, 3, project.title)
-            worksheet.write(r, 4, str(stipend) + str(project.stipend_cr) * conversion_rates[project.stipend_cur])
+            worksheet.write(r, 4, str(stipend) + " " + str(project.stipend_cr))
             worksheet.write(r, 5, ' '.join([x[0:2] for x in project.first_degree.splitlines()]))
             worksheet.write(r, 6, project.holidays)
             worksheet.write(r, 7, f"{project.ofst}")
             worksheet.write(r, 8, f"f{project.ofet}")
             worksheet.write(r, 9, f"{project.desc}")
+            worksheet.write(r, 9, f"{station.station_id}")
             r += 1
     
     workbook.close()
