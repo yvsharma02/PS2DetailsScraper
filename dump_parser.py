@@ -33,7 +33,7 @@ def create_exel(path, stations):
     worksheet.write(0, 7, "Office-Start-Time", header_format)
     worksheet.write(0, 8, "Office-End-Time", header_format)
     worksheet.write(0, 9, "Project Details", header_format)
-    worksheet.write(0, 10, "Station-ID")
+    worksheet.write(0, 10, "Station-ID", header_format)
 
     # conversion_rates = {
     #     "INR": 1,
