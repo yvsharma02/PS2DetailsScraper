@@ -53,13 +53,13 @@ def create_exel(path, stations):
             worksheet.write(r, 1, station.city)
             worksheet.write(r, 2, project.domain)
             worksheet.write(r, 3, project.title)
-            worksheet.write(r, 4, str(stipend) + " " + str(project.stipend_cr))
+            worksheet.write(r, 4, str(stipend) + " " + str(project.stipend_cur))
             worksheet.write(r, 5, ' '.join([x[0:2] for x in project.first_degree.splitlines()]))
             worksheet.write(r, 6, project.holidays)
             worksheet.write(r, 7, f"{project.ofst}")
             worksheet.write(r, 8, f"f{project.ofet}")
             worksheet.write(r, 9, f"{project.desc}")
-            worksheet.write(r, 9, f"{station.station_id}")
+            worksheet.write(r, 10, f"{station.station_id.replace('.json', '')}")
             r += 1
     
     workbook.close()
